@@ -1,0 +1,28 @@
+{
+  "package": "umu-proton",
+  "upstream": {
+    "type": "github-release",
+    "owner": "Open-Wine-Components",
+    "repo": "umu-proton",
+    "tagFilter": "^UMU-Proton"
+  },
+  "packageFile": "sources.nix",
+  "hashes": ["hashX64"],
+  "verify": {
+    "binary": null,
+    "check": "eval"
+  },
+  "description": "UMU-Proton packaged for NixOS - stock Valve Proton for umu-launcher, rolling latest plus pinned channels, tracking upstream daily",
+  "topics": [
+    "nix",
+    "nixos",
+    "flake",
+    "proton",
+    "umu-proton",
+    "umu-launcher",
+    "valve-proton",
+    "steam",
+    "gaming",
+    "wine"
+  ]
+}
