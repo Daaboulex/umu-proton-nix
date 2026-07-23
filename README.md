@@ -80,7 +80,7 @@ programs.steam = {
 };
 ```
 
-Steam lists `UMU-Proton` in each game's Compatibility dropdown, and umu-launcher accepts `PROTONPATH = "${pkgs.umu-proton.steamcompattool}"` directly. Pinning an older release is nix-native: pin this input to the flake revision that carried it (`git log` on this repo maps revisions to `UMU-Proton*` versions).
+Steam lists `UMU-Proton-latest` (plus each pinned major, e.g. `UMU-Proton 9.0-4e`) in each game's Compatibility dropdown, and umu-launcher accepts `PROTONPATH = "${pkgs.umu-proton.steamcompattool}"` directly. Pinning an older release is nix-native: use its frozen per-major channel - `pkgs.umu-proton.v9` after the overlay, or `inputs.umu-proton.packages.${pkgs.system}.v9`.
 
 ## License
 
