@@ -32,6 +32,18 @@ Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set: its
 - **Upstream trust** - daily automated release detection, hash recomputation, and a verified test build, auto-committed to `main`
 - **Stale cleanup** - weekly `flake.lock` refresh (pushed only if it still builds); orphaned update branches older than 30 days are deleted
 
+## Channels
+
+Current pins as of 2026-07-23; the live truth is `sources.nix` (updated daily).
+
+| Attribute | Steam identity | Version |
+|---|---|---|
+| `latest` (`packages.default`, `pkgs.umu-proton`) | `UMU-Proton` | UMU-Proton-10.0-4 |
+| `v10` | `UMU-Proton 10` | UMU-Proton-10.0-4 |
+
+`latest` rolls with every upstream release; each `v<major>` stays on the newest
+pinned release of that major.
+
 <!-- BEGIN generated:installation -->
 ## Installation
 
