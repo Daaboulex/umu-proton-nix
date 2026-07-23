@@ -21,12 +21,12 @@ let
       hashX64 = allReleases.${tag}.hashX64;
     };
 
-  latestDrv = mk sources.version "UMU-Proton";
+  latestDrv = mk sources.version "UMU-Proton-latest";
 
   majorChannels = lib.listToAttrs (
     map (tag: {
       name = "v${majorOf tag}";
-      value = mk tag "UMU-Proton ${majorOf tag}";
+      value = mk tag "UMU-Proton ${lib.removePrefix "UMU-Proton-" tag}";
     }) (lib.attrNames allReleases)
   );
 
