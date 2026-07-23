@@ -23,7 +23,7 @@ Nix flake packaging for [UMU-Proton](https://github.com/Open-Wine-Components/umu
 
 A Nix flake that fetches the prebuilt UMU-Proton release tarballs and exposes them as two-output packages (`out` + `steamcompattool`) in the nixpkgs `proton-ge-bin` shape, so they drop straight into `programs.steam.extraCompatPackages` or a `PROTONPATH`.
 
-Channels mirror the proton-ge-nix model: `latest` follows the newest upstream release under the version-free identity `UMU-Proton`; each pinned release in `sources.nix` gets a `v<major>` channel named `UMU-Proton <major>`. The `compatibilitytool.vdf` identity is normalized so Steam's per-game Compatibility mapping survives every version bump.
+Channels mirror the proton-ge-nix model: `latest` follows the newest upstream release under the rolling identity `UMU-Proton-latest`; each pinned release in `sources.nix` gets a `v<major>` channel named `UMU-Proton <version>` (Steam's exact-version style). A game mapped to `UMU-Proton-latest` rides every update; one mapped to a pin stays on that exact build.
 
 Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set: its wine is Valve's submodule pin plus a small enumerated hotfix list, which makes it the clean A/B arm when a GE patch class is suspected in a regression.
 
@@ -38,11 +38,12 @@ Current pins as of 2026-07-23; the live truth is `sources.nix` (updated daily).
 
 | Attribute | Steam identity | Version |
 |---|---|---|
-| `latest` (`packages.default`, `pkgs.umu-proton`) | `UMU-Proton` | UMU-Proton-10.0-4 |
-| `v10` | `UMU-Proton 10` | UMU-Proton-10.0-4 |
+| `latest` (`packages.default`, `pkgs.umu-proton`) | `UMU-Proton-latest` | UMU-Proton-10.0-4 |
+| `v10` | `UMU-Proton 10.0-4` | UMU-Proton-10.0-4 |
+| `v9` | `UMU-Proton 9.0-4e` | UMU-Proton-9.0-4e |
 
-`latest` rolls with every upstream release; each `v<major>` stays on the newest
-pinned release of that major.
+`latest` rolls with every upstream release; each `v<major>` is a frozen pin on
+that major's newest packaged release.
 
 <!-- BEGIN generated:installation -->
 ## Installation
