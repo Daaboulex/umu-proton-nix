@@ -7,12 +7,14 @@
     "tagFilter": "^UMU-Proton"
   },
   "packageFile": "sources.nix",
-  "hashes": ["hashX64"],
+  "hashes": [
+    "hashX64"
+  ],
   "verify": {
     "binary": null,
     "check": "eval"
   },
-  "description": "UMU-Proton packaged for NixOS - stock Valve Proton for umu-launcher, rolling latest plus pinned channels, tracking upstream daily",
+  "description": "UMU-Proton packaged for NixOS - stock Valve Proton for umu-launcher, rolling latest plus pinned channels",
   "topics": [
     "nix",
     "nixos",
@@ -24,5 +26,8 @@
     "steam",
     "gaming",
     "wine"
-  ]
+  ],
+  "platforms": {
+    "aarch64-linux": "no aarch64 release asset upstream"
+  }
 }
