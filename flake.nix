@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     std = {
-      url = "github:Daaboulex/nix-packaging-standard?ref=v2.21.0";
+      url = "github:Daaboulex/nix-packaging-standard?ref=v2.22.1";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.git-hooks.follows = "git-hooks";
     };
@@ -57,7 +57,7 @@
         };
 
       flake.overlays.default = final: _prev: {
-        umu-proton = (final.callPackage ./default.nix { }).umu-proton;
+        inherit ((final.callPackage ./default.nix { })) umu-proton;
       };
     };
 }
