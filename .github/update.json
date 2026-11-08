@@ -7,6 +7,7 @@
     "tagFilter": "^UMU-Proton"
   },
   "packageFile": "sources.nix",
+  "majorPattern": "[A-Z]+-Proton-([0-9]+\\.[0-9]+)-.*",
   "hashes": [
     "hashX64"
   ],
