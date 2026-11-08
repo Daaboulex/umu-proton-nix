@@ -18,30 +18,27 @@
   outputs =
     inputs@{ flake-parts, ... }:
     let
-      toolsFor =
-        pkgs:
-        inputs.std.lib.steamCompatTool {
-          inherit pkgs;
-          attribute = "umu-proton";
-          brand = "UMU-Proton";
-          homepage = "https://github.com/Open-Wine-Components/umu-proton";
-          description = "UMU-Proton prebuilt Steam Play compatibility tool, stock Valve Proton for umu-launcher";
-          license = pkgs.lib.licenses.bsd3;
-          sources = import ./sources.nix;
-          inherit (pkgs.lib.importJSON ./.github/update.json) majorPattern;
-          buildOf = tag: pkgs.lib.head (builtins.match "[A-Z]+-Proton-[0-9]+\\.[0-9]+-(.*)" tag);
-          assetUrl =
-            tag: _token:
-            "https://github.com/Open-Wine-Components/umu-proton/releases/download/${tag}/${tag}.tar.gz";
-          variantsOf = release: {
-            x86_64 = release.hashX64;
-          };
-          tokens.x86_64 = {
-            system = "x86_64-linux";
-            suffix = "";
-            qualifier = null;
-          };
+      umu = inputs.std.lib.steamCompatTool (pkgs: {
+        attribute = "umu-proton";
+        brand = "UMU-Proton";
+        homepage = "https://github.com/Open-Wine-Components/umu-proton";
+        description = "UMU-Proton prebuilt Steam Play compatibility tool, stock Valve Proton for umu-launcher";
+        license = pkgs.lib.licenses.bsd3;
+        sources = import ./sources.nix;
+        inherit (pkgs.lib.importJSON ./.github/update.json) majorPattern;
+        buildOf = tag: pkgs.lib.head (builtins.match "[A-Z]+-Proton-[0-9]+\\.[0-9]+-(.*)" tag);
+        assetUrl =
+          tag: _token:
+          "https://github.com/Open-Wine-Components/umu-proton/releases/download/${tag}/${tag}.tar.gz";
+        variantsOf = release: {
+          x86_64 = release.hashX64;
         };
+        tokens.x86_64 = {
+          system = "x86_64-linux";
+          suffix = "";
+          qualifier = null;
+        };
+      });
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
@@ -54,24 +51,15 @@
       perSystem =
         { pkgs, ... }:
         let
-          umu = toolsFor pkgs;
+          host = umu.forPkgs pkgs;
         in
         {
-          packages = umu.tools // {
-            default = umu.tools.umu-proton-x86_64;
+          packages = host.tools // {
+            default = host.tools.umu-proton-x86_64;
           };
-          checks.compat-tool-shape = umu.checks.compat-tool-shape;
-          checks.overlay-applies =
-            let
-              applied = pkgs.extend inputs.self.overlays.default;
-            in
-            pkgs.runCommand "overlay-applies" { } ''
-              test -n "${applied.umu-proton-x86_64.version}"
-              test -n "${applied.umu-proton-x86_64.v10.version}"
-              touch $out
-            '';
+          inherit (host) checks;
         };
 
-      flake.overlays.default = _final: prev: (toolsFor prev).tools;
+      flake.overlays.default = umu.overlay;
     };
 }
