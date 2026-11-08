@@ -21,9 +21,14 @@ Nix flake packaging for [UMU-Proton](https://github.com/Open-Wine-Components/umu
 
 ## What Is This?
 
-A Nix flake that fetches the prebuilt UMU-Proton release tarballs and exposes them as two-output packages (`out` + `steamcompattool`) in the nixpkgs `proton-ge-bin` shape, so they drop straight into `programs.steam.extraCompatPackages` or a `PROTONPATH`.
+A Nix flake that fetches the prebuilt UMU-Proton release tarballs and exposes them as two-output packages (`out` + `steamcompattool`) in the nixpkgs `proton-ge-bin` shape, so they drop straight into `programs.steam.extraCompatPackages` or a `PROTONPATH`. The packages are built by the fleet standard's `steamCompatTool`, so this flake carries only upstream's facts: the tag, the asset hash, the brand and the major line.
 
-Channels mirror the proton-ge-nix model: `latest` follows the newest upstream release under the rolling identity `UMU-Proton-latest`; each pinned release in `sources.nix` gets a `v<major>` channel named `UMU-Proton <version>` (Steam's exact-version style). A game mapped to `UMU-Proton-latest` rides every update; one mapped to a pin stays on that exact build.
+Upstream ships one x86_64 tarball per release and no aarch64 build:
+
+| Attribute | What it is | System |
+|---|---|---|
+| `umu-proton` (`pkgs.umu-proton`) | the host's own build | `x86_64-linux` |
+| `umu-proton-x86_64` (`packages.default`) | the x86_64 tarball on a host of either architecture, for an x86 Steam client running under FEX on aarch64; on `x86_64-linux` the same derivation as `umu-proton` | both |
 
 Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set: its wine is Valve's submodule pin plus a small enumerated hotfix list, which makes it the clean A/B arm when a GE patch class is suspected in a regression.
 
@@ -34,16 +39,19 @@ Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set: its
 
 ## Channels
 
-Current pins as of 2026-07-23; the live truth is `sources.nix` (updated daily).
+Every channel is a passthru of the tool attribute (`pkgs.umu-proton.v9`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is the last release of a closed line. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in `.github/update.json`), so no channel vanishes and nobody edits a hash by hand.
 
-| Attribute | Steam identity | Version |
-|---|---|---|
-| `latest` (`packages.default`, `pkgs.umu-proton`) | `UMU-Proton-latest` | UMU-Proton-10.0-4 |
-| `v10` | `UMU-Proton 10.0-4` | UMU-Proton-10.0-4 |
-| `v9` | `UMU-Proton 9.0-4e` | UMU-Proton-9.0-4e |
+Each channel's `compatibilitytool.vdf` carries two names. The key, what Steam saves for a game's choice, is the attribute and the channel and never moves, so a choice survives every update. The display name, what the dropdown shows, is `UMU-Proton <major> (<build>, latest)` for the rolling channel and `UMU-Proton <major> (<build>)` for a pin, so it says which release runs.
 
-`latest` rolls with every upstream release; each `v<major>` is a frozen pin on
-that major's newest packaged release.
+Pins as of 2026-11-08; the live truth is `sources.nix` (updated daily).
+
+| Channel | Key Steam saves | Dropdown | Release |
+|---|---|---|---|
+| `latest` | `umu-proton-latest` | `UMU-Proton 10.0 (4, latest)` | UMU-Proton-10.0-4 |
+| `v9` | `umu-proton-v9` | `UMU-Proton 9.0 (4e)` | UMU-Proton-9.0-4e |
+| `v8` | `umu-proton-v8` | `UMU-Proton 8.0 (5-3)` | ULWGL-Proton-8.0-5-3, under the project's former name |
+
+The keys replaced the versioned identities of earlier builds (`UMU-Proton-latest`, `UMU-Proton 9.0-4e`): a game mapped to one of those shows no tool until it is picked again, once.
 
 <!-- BEGIN generated:installation -->
 ## Installation
@@ -76,11 +84,14 @@ or apply `inputs.umu-proton.overlays.default` and use `pkgs.umu-proton`.
 ```nix
 programs.steam = {
   enable = true;
-  extraCompatPackages = [ pkgs.umu-proton ];
+  extraCompatPackages = [
+    pkgs.umu-proton
+    pkgs.umu-proton.v9
+  ];
 };
 ```
 
-Steam lists `UMU-Proton-latest` (plus each pinned major, e.g. `UMU-Proton 9.0-4e`) in each game's Compatibility dropdown, and umu-launcher accepts `PROTONPATH = "${pkgs.umu-proton.steamcompattool}"` directly. Pinning an older release is nix-native: use its frozen per-major channel - `pkgs.umu-proton.v9` after the overlay, or `inputs.umu-proton.packages.${pkgs.system}.v9`.
+Steam lists `UMU-Proton 10.0 (4, latest)` and `UMU-Proton 9.0 (4e)` in each game's Compatibility dropdown, and umu-launcher accepts `PROTONPATH = "${pkgs.umu-proton.steamcompattool}"` directly. `checks.compat-tool-shape` builds every channel and reads each vdf for the key and display formats.
 
 ## License
 
