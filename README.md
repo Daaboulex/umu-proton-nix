@@ -39,7 +39,7 @@ Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set: its
 
 ## Channels
 
-Every channel is a passthru of the tool attribute (`pkgs.umu-proton.v9`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is the last release of a closed line. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in `.github/update.json`), so no channel vanishes and nobody edits a hash by hand.
+Every channel is a passthru of the tool attribute (`pkgs.umu-proton.v9`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is a line: the rolling line's channel follows its newest release and shows as a pin, a closed line's channel is its last release. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in `.github/update.json`), so no channel vanishes and nobody edits a hash by hand.
 
 Each channel's `compatibilitytool.vdf` carries two names. The key, what Steam saves for a game's choice, is the attribute and the channel and never moves, so a choice survives every update. The display name, what the dropdown shows, is `UMU-Proton <major> (<build>, latest)` for the rolling channel and `UMU-Proton <major> (<build>)` for a pin, so it says which release runs.
 
@@ -48,6 +48,7 @@ Pins as of 2026-11-08; the live truth is `sources.nix` (updated daily).
 | Channel | Key Steam saves | Dropdown | Release |
 |---|---|---|---|
 | `latest` | `umu-proton-latest` | `UMU-Proton 10.0 (4, latest)` | UMU-Proton-10.0-4 |
+| `v10` | `umu-proton-v10` | `UMU-Proton 10.0 (4)` | UMU-Proton-10.0-4, the rolling line |
 | `v9` | `umu-proton-v9` | `UMU-Proton 9.0 (4e)` | UMU-Proton-9.0-4e |
 | `v8` | `umu-proton-v8` | `UMU-Proton 8.0 (5-3)` | ULWGL-Proton-8.0-5-3, under the project's former name |
 
