@@ -17,47 +17,52 @@
 
   outputs =
     inputs@{ flake-parts, ... }:
+    let
+      toolsFor =
+        pkgs:
+        inputs.std.lib.steamCompatTool {
+          inherit pkgs;
+          attribute = "umu-proton";
+          brand = "UMU-Proton";
+          homepage = "https://github.com/Open-Wine-Components/umu-proton";
+          description = "UMU-Proton prebuilt Steam Play compatibility tool, stock Valve Proton for umu-launcher";
+          license = pkgs.lib.licenses.bsd3;
+          sources = import ./sources.nix;
+          inherit (pkgs.lib.importJSON ./.github/update.json) majorPattern;
+          buildOf = tag: pkgs.lib.head (builtins.match "[A-Z]+-Proton-[0-9]+\\.[0-9]+-(.*)" tag);
+          assetUrl =
+            tag: _token:
+            "https://github.com/Open-Wine-Components/umu-proton/releases/download/${tag}/${tag}.tar.gz";
+          variantsOf = release: {
+            x86_64 = release.hashX64;
+          };
+          tokens.x86_64 = {
+            system = "x86_64-linux";
+            suffix = "";
+            qualifier = null;
+          };
+        };
+    in
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [ "x86_64-linux" ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
       imports = [ inputs.std.flakeModules.base ];
 
       perSystem =
-        { pkgs, lib, ... }:
+        { pkgs, ... }:
         let
-          assembled = pkgs.callPackage ./default.nix { };
+          umu = toolsFor pkgs;
         in
         {
-          packages = {
-            default = assembled.umu-proton;
-          }
-          // assembled.channels;
-
-          checks.compat-tool-shape =
-            let
-              named = lib.mapAttrsToList (n: drv: {
-                inherit n;
-                tool = drv.steamcompattool;
-                ver = drv.version;
-              }) assembled.channels;
-            in
-            pkgs.runCommand "umu-proton-shape" { } ''
-              ${lib.concatMapStringsSep "\n" (c: ''
-                echo "checking channel ${c.n} (${c.ver})"
-                test -e "${c.tool}/proton"
-                test -f "${c.tool}/compatibilitytool.vdf"
-                grep -q '"UMU-Proton' "${c.tool}/compatibilitytool.vdf"
-                if grep -qF "${c.ver}" "${c.tool}/compatibilitytool.vdf"; then
-                  echo "versioned identity ${c.ver} leaked into channel ${c.n}'s vdf" >&2
-                  exit 1
-                fi
-              '') named}
-              touch "$out"
-            '';
+          packages = umu.tools // {
+            default = umu.tools.umu-proton-x86_64;
+          };
+          checks.compat-tool-shape = umu.checks.compat-tool-shape;
         };
 
-      flake.overlays.default = final: _prev: {
-        inherit ((final.callPackage ./default.nix { })) umu-proton;
-      };
+      flake.overlays.default = final: _prev: (toolsFor final).tools;
     };
 }

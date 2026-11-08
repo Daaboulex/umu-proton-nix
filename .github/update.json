@@ -27,8 +27,5 @@
     "steam",
     "gaming",
     "wine"
-  ],
-  "platforms": {
-    "aarch64-linux": "no aarch64 release asset upstream"
-  }
+  ]
 }
