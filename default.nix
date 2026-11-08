@@ -5,7 +5,7 @@
 let
   sources = import ./sources.nix;
 
-  majorOf = tag: lib.head (builtins.match "UMU-Proton-([0-9]+)\\..*" tag);
+  majorOf = tag: lib.head (builtins.match "[A-Z]+-Proton-([0-9]+)\\..*" tag);
 
   allReleases = {
     ${sources.version} = {
