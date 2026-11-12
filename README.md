@@ -32,27 +32,13 @@ Upstream ships one x86_64 tarball per release and no aarch64 build:
 
 Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set: its wine is Valve's submodule pin plus a small enumerated hotfix list, which makes it the clean A/B arm when a GE patch class is suspected in a regression.
 
-- **Package integrity** - SRI source hashes, verified on every build
-- **CI security** - pinned GitHub Actions (full SHA, not tags), minimal permissions, build-gated PRs
-- **Upstream trust** - daily automated release detection, hash recomputation, and a verified test build, auto-committed to `main`
-- **Stale cleanup** - weekly `flake.lock` refresh (pushed only if it still builds); orphaned update branches older than 30 days are deleted
-
 ## Channels
 
-Every channel is a passthru of the tool attribute (`pkgs.umu-proton.v9`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is a line: the rolling line's channel follows its newest release and shows as a pin, a closed line's channel is its last release. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in `.github/update.json`), so no channel vanishes and nobody edits a hash by hand.
+Every channel is a passthru of the tool attribute (`pkgs.umu-proton.v9`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is a line: the rolling line's channel follows its newest release and shows as a pin, a closed line's channel is its last release. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in [`.github/update.json`](./.github/update.json)), so no channel vanishes and nobody edits a hash by hand.
 
 Each channel's `compatibilitytool.vdf` carries two names. The key, what Steam saves for a game's choice, is the attribute and the channel and never moves, so a choice survives every update. The display name, what the dropdown shows, is `UMU-Proton <major> (<build>, latest)` for the rolling channel and `UMU-Proton <major> (<build>)` for a pin, so it says which release runs.
 
-Pins as of 2026-11-08; the live truth is `sources.nix` (updated daily).
-
-| Channel | Key Steam saves | Dropdown | Release |
-|---|---|---|---|
-| `latest` | `umu-proton-latest` | `UMU-Proton 10.0 (4, latest)` | UMU-Proton-10.0-4 |
-| `v10` | `umu-proton-v10` | `UMU-Proton 10.0 (4)` | UMU-Proton-10.0-4, the rolling line |
-| `v9` | `umu-proton-v9` | `UMU-Proton 9.0 (4e)` | UMU-Proton-9.0-4e |
-| `v8` | `umu-proton-v8` | `UMU-Proton 8.0 (5-3)` | ULWGL-Proton-8.0-5-3, under the project's former name |
-
-The keys replaced the versioned identities of earlier builds (`UMU-Proton-latest`, `UMU-Proton 9.0-4e`): a game mapped to one of those shows no tool until it is picked again, once.
+The rolling release and the pinned releases are in [`sources.nix`](./sources.nix), which the daily updater moves.
 
 <!-- BEGIN generated:installation -->
 ## Installation
@@ -72,7 +58,7 @@ Then either take the package directly:
 
 ```nix
 programs.steam.extraCompatPackages = [
-  inputs.umu-proton.packages.${pkgs.system}.default
+  inputs.umu-proton.packages.${pkgs.stdenv.hostPlatform.system}.default
 ];
 ```
 
@@ -92,7 +78,7 @@ programs.steam = {
 };
 ```
 
-Steam lists `UMU-Proton 10.0 (4, latest)` and `UMU-Proton 9.0 (4e)` in each game's Compatibility dropdown, and umu-launcher accepts `PROTONPATH = "${pkgs.umu-proton.steamcompattool}"` directly. `checks.compat-tool-shape` builds every channel and reads each vdf for the key and display formats.
+Steam lists both in each game's Compatibility dropdown, under the display names the Channels section gives, and umu-launcher accepts `PROTONPATH = "${pkgs.umu-proton.steamcompattool}"` directly. `checks.compat-tool-shape` builds every channel and reads each vdf for the key and display formats.
 
 ## License
 
