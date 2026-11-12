@@ -1,49 +1,37 @@
 # umu-proton (Nix)
 
-<!-- BEGIN generated:badges -->
-[![CI](https://github.com/Daaboulex/umu-proton-nix/actions/workflows/ci.yml/badge.svg)](https://github.com/Daaboulex/umu-proton-nix/actions/workflows/ci.yml)
-[![NixOS unstable](https://img.shields.io/badge/NixOS-unstable-78C0E8?logo=nixos&logoColor=white)](https://nixos.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-<!-- END generated:badges -->
+[UMU-Proton](https://github.com/Open-Wine-Components/umu-proton) by
+[Open Wine Components](https://github.com/Open-Wine-Components), packaged as a
+Nix flake. UMU-Proton is stock Valve Proton rebuilt to run without Steam via
+umu-launcher. The packages go into `programs.steam.extraCompatPackages` or a
+`PROTONPATH`.
 
-Nix flake packaging for [UMU-Proton](https://github.com/Open-Wine-Components/umu-proton) by [Open Wine Components](https://github.com/Open-Wine-Components) - stock Valve Proton rebuilt to run without Steam via umu-launcher.
+Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set.
+Its wine is Valve's submodule pin plus a small enumerated hotfix list. That
+makes it the clean side of an A/B comparison when a GE patch class is suspected
+in a regression.
 
-<!-- BEGIN generated:upstream -->
-## Upstream
+The flake fetches upstream's prebuilt release tarballs and compiles nothing.
+Its check builds every channel and reads each `compatibilitytool.vdf`, but it
+does not start a game. This repository records no game run on either
+architecture.
 
-| | |
-|---|---|
-| **Project** | [Open-Wine-Components/umu-proton](https://github.com/Open-Wine-Components/umu-proton) |
-| **License** | BSD-3-Clause (Valve Proton lineage) |
-| **Tracked** | GitHub releases (`UMU-Proton*` tags, daily) |
+## What you get
 
-<!-- END generated:upstream -->
+Upstream ships one x86_64 tarball per release and no aarch64 build.
 
-## What Is This?
+- `umu-proton` is the host's own build. It exists on `x86_64-linux` only.
+- `umu-proton-x86_64` is the x86_64 tarball on a host of either architecture.
+  On aarch64 it is for an x86 Steam client running under FEX. On
+  `x86_64-linux` it is the same derivation as `umu-proton`.
 
-A Nix flake that fetches the prebuilt UMU-Proton release tarballs and exposes them as two-output packages (`out` + `steamcompattool`) in the nixpkgs `proton-ge-bin` shape, so they drop straight into `programs.steam.extraCompatPackages` or a `PROTONPATH`. The packages are built by the fleet standard's `steamCompatTool`, so this flake carries only upstream's facts: the tag, the asset hash, the brand and the major line.
+`umu-proton-x86_64` is the flake's default package on both systems. Each
+package has two outputs, `out` and `steamcompattool`, in the shape of nixpkgs'
+`proton-ge-bin`.
 
-Upstream ships one x86_64 tarball per release and no aarch64 build:
+## Install
 
-| Attribute | What it is | System |
-|---|---|---|
-| `umu-proton` (`pkgs.umu-proton`) | the host's own build | `x86_64-linux` |
-| `umu-proton-x86_64` (`packages.default`) | the x86_64 tarball on a host of either architecture, for an x86 Steam client running under FEX on aarch64; on `x86_64-linux` the same derivation as `umu-proton` | both |
-
-Unlike GE-Proton, UMU-Proton carries no wine-staging or protonify patch set: its wine is Valve's submodule pin plus a small enumerated hotfix list, which makes it the clean A/B arm when a GE patch class is suspected in a regression.
-
-## Channels
-
-Every channel is a passthru of the tool attribute (`pkgs.umu-proton.v9`), never a top-level package. `latest` follows upstream's newest release; each `v<major>` is a line: the rolling line's channel follows its newest release and shows as a pin, a closed line's channel is its last release. When upstream opens a new major, the daily updater pins the outgoing release by itself (`majorPattern` in [`.github/update.json`](./.github/update.json)), so no channel vanishes and nobody edits a hash by hand.
-
-Each channel's `compatibilitytool.vdf` carries two names. The key, what Steam saves for a game's choice, is the attribute and the channel and never moves, so a choice survives every update. The display name, what the dropdown shows, is `UMU-Proton <major> (<build>, latest)` for the rolling channel and `UMU-Proton <major> (<build>)` for a pin, so it says which release runs.
-
-The rolling release and the pinned releases are in [`sources.nix`](./sources.nix), which the daily updater moves.
-
-<!-- BEGIN generated:installation -->
-## Installation
-
-Add as a flake input:
+Add the flake:
 
 ```nix
 {
@@ -54,7 +42,7 @@ Add as a flake input:
 }
 ```
 
-Then either take the package directly:
+Then hand the package to Steam:
 
 ```nix
 programs.steam.extraCompatPackages = [
@@ -62,11 +50,12 @@ programs.steam.extraCompatPackages = [
 ];
 ```
 
-or apply `inputs.umu-proton.overlays.default` and use `pkgs.umu-proton`.
+Or apply `inputs.umu-proton.overlays.default` and use `pkgs.umu-proton`. On
+aarch64 the overlay provides `pkgs.umu-proton-x86_64` instead.
 
-<!-- END generated:installation -->
+## Use
 
-## Usage
+With the overlay applied, on `x86_64-linux`:
 
 ```nix
 programs.steam = {
@@ -78,11 +67,51 @@ programs.steam = {
 };
 ```
 
-Steam lists both in each game's Compatibility dropdown, under the display names the Channels section gives, and umu-launcher accepts `PROTONPATH = "${pkgs.umu-proton.steamcompattool}"` directly. `checks.compat-tool-shape` builds every channel and reads each vdf for the key and display formats.
+Steam lists both in each game's Compatibility dropdown. umu-launcher accepts
+the tool directly:
+
+```nix
+PROTONPATH = "${pkgs.umu-proton.steamcompattool}";
+```
+
+## Channels
+
+A channel is reached through the tool attribute, as in `pkgs.umu-proton.v9`.
+It is never a top-level package.
+
+| Channel | What it follows |
+|---|---|
+| `latest` | Upstream's newest release. The attribute itself is this channel. |
+| `v<major>` | One major line. A closed line stays at its last release. |
+
+The line upstream is still releasing has a `v<major>` channel too. It follows
+that line's newest release and shows as a pin.
+
+In the dropdown the rolling channel reads `UMU-Proton <major> (<build>, latest)`
+and a pin reads `UMU-Proton <major> (<build>)`, so the name says which release
+runs. A game's choice of channel survives every update.
+
+The releases behind the channels are in [sources.nix](sources.nix), which a
+daily updater moves.
+
+## Known limits
+
+- Upstream has no aarch64 build. On aarch64 the only package is the x86_64
+  tarball, which is for an x86 Steam client running under FEX.
+- The `out` output holds only a note. A path to the tool, such as a
+  `PROTONPATH`, takes the `steamcompattool` output.
+- A closed major line keeps one release, its last.
+
+## More
+
+- [docs/DESIGN.md](docs/DESIGN.md): how the packages are built, the two names
+  in each `compatibilitytool.vdf`, what happens when upstream opens a new major
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): the checks, the daily updater,
+  the workflows
+- [SECURITY.md](SECURITY.md): how to report a vulnerability
 
 ## License
 
-The packaging is MIT. UMU-Proton itself is upstream's license (Valve Proton BSD-3-Clause lineage plus bundled components); this flake redistributes nothing - tarballs are fetched from upstream's GitHub releases at build time.
-
-<!-- BEGIN generated:footer -->
-<!-- END generated:footer -->
+The packaging is MIT. UMU-Proton itself is upstream's license (Valve Proton
+BSD-3-Clause lineage plus bundled components); this flake redistributes
+nothing. Tarballs are fetched from upstream's GitHub releases at build time.
