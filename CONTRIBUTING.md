@@ -55,6 +55,7 @@ Open an issue with the bug, request or task form.
   request or a comment on one: no personal names, addresses, machines, hardware, paths, tools or
   habits.
 - Never hide an error. Read a result from the check's own exit code.
+- Scratch work goes in `.devshell/work/`, one folder per job, removed when the work lands.
 
 ## Improve these rules
 

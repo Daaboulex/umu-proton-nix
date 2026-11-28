@@ -51,3 +51,4 @@ venv/
 /build/
 /dist/
 /target/
+CLAUDE.local.md
