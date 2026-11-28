@@ -25,7 +25,8 @@ The rolling release and the pinned releases are in
 
 [.github/update.json](../.github/update.json) tells the updater what to follow:
 the GitHub releases of `Open-Wine-Components/umu-proton` whose tag starts with
-`UMU-Proton`. The hash it rewrites is `hashX64`.
+`UMU-Proton`. It lists the newest release's assets and writes each one, its URL
+and its hash, into `variants` in `sources.nix`.
 
 When upstream opens a new major, the updater pins the outgoing release by
 itself. `majorPattern` in the same file names the major line. The updater edits

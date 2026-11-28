@@ -30,13 +30,18 @@
         assetUrl =
           tag: _token:
           "https://github.com/Open-Wine-Components/umu-proton/releases/download/${tag}/${tag}.tar.gz";
-        variantsOf = release: {
-          x86_64 = release.hashX64;
-        };
-        tokens.x86_64 = {
-          system = "x86_64-linux";
-          suffix = "";
-          qualifier = null;
+        variantsOf = release: release.variants;
+        tokens = {
+          x86_64 = {
+            system = "x86_64-linux";
+            suffix = "";
+            qualifier = null;
+          };
+          aarch64 = {
+            system = "aarch64-linux";
+            suffix = "";
+            qualifier = null;
+          };
         };
       });
     in

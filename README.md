@@ -18,9 +18,7 @@ architecture.
 
 ## What you get
 
-Upstream ships one x86_64 tarball per release and no aarch64 build.
-
-- `umu-proton` is the host's own build. It exists on `x86_64-linux` only.
+- `umu-proton` is the host's own build, x86_64 or aarch64.
 - `umu-proton-x86_64` is the x86_64 tarball on a host of either architecture.
   On aarch64 it is for an x86 Steam client running under FEX. On
   `x86_64-linux` it is the same derivation as `umu-proton`.
@@ -50,8 +48,7 @@ programs.steam.extraCompatPackages = [
 ];
 ```
 
-Or apply `inputs.umu-proton.overlays.default` and use `pkgs.umu-proton`. On
-aarch64 the overlay provides `pkgs.umu-proton-x86_64` instead.
+Or apply `inputs.umu-proton.overlays.default` and use `pkgs.umu-proton`.
 
 ## Use
 
@@ -96,8 +93,9 @@ daily updater moves.
 
 ## Known limits
 
-- Upstream has no aarch64 build. On aarch64 the only package is the x86_64
-  tarball, which is for an x86 Steam client running under FEX.
+- Upstream builds for aarch64 since UMU-Proton-11.0-2e. On `aarch64-linux`
+  `umu-proton` carries only the channels of those releases, and the older
+  lines exist on `umu-proton-x86_64` alone.
 - The `out` output holds only a note. A path to the tool, such as a
   `PROTONPATH`, takes the `steamcompattool` output.
 - A closed major line keeps one release, its last.
